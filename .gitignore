@@ -1,0 +1,45 @@
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+deploy.env
+deploy.state
+
+# Build output
+bin/
+dist/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test and coverage
+*.test
+*.out
+coverage.*
+*.coverprofile
+
+# App data
+data/
+logs/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Go workspace
+go.work
+go.work.sum
+
+# IDE and editors
+.cursor/
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
