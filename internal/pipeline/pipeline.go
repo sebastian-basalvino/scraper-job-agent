@@ -35,14 +35,16 @@ func New(cfg config.Config, st *store.Store, logger *slog.Logger) *Pipeline {
 		cfg: cfg,
 		store: st,
 		imap: imapingest.NewClient(imapingest.ClientConfig{
-			Host:           cfg.IMAPHost,
-			Port:           cfg.IMAPPort,
-			User:           cfg.IMAPUser,
-			Password:       cfg.IMAPPassword,
-			Inbox:          cfg.IMAPInbox,
-			Processed:      cfg.IMAPProcessed,
-			LinkedInSender: cfg.LinkedInSender,
-			WorkanaSender:  cfg.WorkanaSender,
+			Host:            cfg.IMAPHost,
+			Port:            cfg.IMAPPort,
+			User:            cfg.IMAPUser,
+			Password:        cfg.IMAPPassword,
+			Inbox:           cfg.IMAPInbox,
+			Processed:       cfg.IMAPProcessed,
+			LinkedInSender:  cfg.LinkedInSender,
+			WorkanaSender:   cfg.WorkanaSender,
+			LinkedInEnabled: cfg.SourceEnabled(model.SourceLinkedIn),
+			WorkanaEnabled:  cfg.SourceEnabled(model.SourceWorkana),
 		}, logger),
 		remotive: remotive.NewClient(),
 		scorer:   scoring.NewClient(cfg.AnthropicAPIKey, cfg.ClaudeModel),
@@ -55,18 +57,22 @@ func New(cfg config.Config, st *store.Store, logger *slog.Logger) *Pipeline {
 func (p *Pipeline) Run(ctx context.Context) error {
 	var allOffers []model.Offer
 
-	imapOffers, err := p.imap.FetchOffers(ctx)
-	if err != nil {
-		p.logger.Error("fetch imap offers", "error", err)
-	} else {
-		allOffers = append(allOffers, imapOffers...)
+	if p.cfg.SourceEnabled(model.SourceLinkedIn) || p.cfg.SourceEnabled(model.SourceWorkana) {
+		imapOffers, err := p.imap.FetchOffers(ctx)
+		if err != nil {
+			p.logger.Error("fetch imap offers", "error", err)
+		} else {
+			allOffers = append(allOffers, imapOffers...)
+		}
 	}
 
-	remotiveOffers, err := p.remotive.FetchOffers(ctx)
-	if err != nil {
-		p.logger.Error("fetch remotive offers", "error", err)
-	} else {
-		allOffers = append(allOffers, remotiveOffers...)
+	if p.cfg.SourceEnabled(model.SourceRemotive) {
+		remotiveOffers, err := p.remotive.FetchOffers(ctx)
+		if err != nil {
+			p.logger.Error("fetch remotive offers", "error", err)
+		} else {
+			allOffers = append(allOffers, remotiveOffers...)
+		}
 	}
 
 	p.logger.Info("offers fetched", "count", len(allOffers))

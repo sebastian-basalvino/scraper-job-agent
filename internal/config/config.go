@@ -5,6 +5,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"scraper/internal/model"
 )
 
 // Config holds all runtime configuration loaded from environment variables.
@@ -25,8 +27,10 @@ type Config struct {
 	TelegramBotToken string
 	TelegramChatID   string
 
-	SQLitePath   string
+	SQLitePath     string
 	ScoreThreshold int
+
+	EnabledSources map[model.Source]bool
 }
 
 // Load reads configuration from environment variables and validates required fields.
@@ -47,6 +51,12 @@ func Load() (Config, error) {
 		SQLitePath:       envOrDefault("SQLITE_PATH", "./data/offers.db"),
 		ScoreThreshold:   envIntOrDefault("SCORE_THRESHOLD", 65),
 	}
+
+	enabled, err := parseEnabledSources(envOrDefault("ENABLED_SOURCES", "linkedin"))
+	if err != nil {
+		return Config{}, err
+	}
+	cfg.EnabledSources = enabled
 
 	var missing []string
 	if cfg.IMAPUser == "" {
@@ -69,6 +79,38 @@ func Load() (Config, error) {
 	}
 
 	return cfg, nil
+}
+
+// SourceEnabled reports whether ingestion for the given source is active.
+func (c Config) SourceEnabled(source model.Source) bool {
+	return c.EnabledSources[source]
+}
+
+func parseEnabledSources(raw string) (map[model.Source]bool, error) {
+	known := map[string]model.Source{
+		"linkedin": model.SourceLinkedIn,
+		"workana":  model.SourceWorkana,
+		"remotive": model.SourceRemotive,
+	}
+
+	enabled := make(map[model.Source]bool)
+	for part := range strings.SplitSeq(raw, ",") {
+		name := strings.ToLower(strings.TrimSpace(part))
+		if name == "" {
+			continue
+		}
+		source, ok := known[name]
+		if !ok {
+			return nil, fmt.Errorf("unknown source in ENABLED_SOURCES: %s (valid: linkedin, workana, remotive)", name)
+		}
+		enabled[source] = true
+	}
+
+	if len(enabled) == 0 {
+		return nil, fmt.Errorf("ENABLED_SOURCES must include at least one source")
+	}
+
+	return enabled, nil
 }
 
 func envOrDefault(key, fallback string) string {

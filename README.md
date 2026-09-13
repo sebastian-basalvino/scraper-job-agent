@@ -1,6 +1,8 @@
 # Freelance Job Agent
 
-Automated system that monitors freelance/remote job offers from LinkedIn (IMAP), Workana (IMAP), and Remotive (API), filters them, scores them with Claude Haiku, and notifies relevant matches via Telegram.
+Automated system that monitors freelance/remote job offers from configurable sources — LinkedIn (IMAP), Workana (IMAP), and Remotive (API) — filters them, scores them with Claude Haiku, and notifies relevant matches via Telegram.
+
+By default only **LinkedIn** is enabled. Enable or disable each connector with `ENABLED_SOURCES` (see [Connectors](#connectors)).
 
 ## Architecture
 
@@ -85,10 +87,10 @@ The app only needs **outbound HTTPS (port 443)** to:
 
 | Destination | Purpose |
 |-------------|---------|
-| IMAP server (e.g. `imap.gmail.com:993`) | Read LinkedIn/Workana alerts |
+| IMAP server (e.g. `imap.gmail.com:993`) | Read LinkedIn/Workana alerts (if enabled) |
 | `api.anthropic.com` | Scoring with Claude |
 | `api.telegram.org` | Notifications |
-| `remotive.com` | Job listings API |
+| `remotive.com` | Job listings API (only if `remotive` is in `ENABLED_SOURCES`) |
 
 The default security group (all outbound traffic allowed) is sufficient. For SSH, open port 22 from your IP only.
 
@@ -302,10 +304,43 @@ No restart is required: cron picks up the new binary on the next run.
 
 ---
 
+## Connectors
+
+Each ingestion source can be turned on or off independently via `ENABLED_SOURCES` (comma-separated list).
+
+| Source | Value | Transport | Notes |
+|--------|-------|-----------|-------|
+| LinkedIn | `linkedin` | IMAP | Parses job alert emails |
+| Workana | `workana` | IMAP | Parses project alert emails |
+| Remotive | `remotive` | HTTPS API | Fetches remote job listings |
+
+**Default:** `linkedin` (Workana and Remotive are disabled).
+
+Examples:
+
+```bash
+# LinkedIn only (default)
+ENABLED_SOURCES=linkedin
+
+# LinkedIn + Remotive
+ENABLED_SOURCES=linkedin,remotive
+
+# All sources
+ENABLED_SOURCES=linkedin,workana,remotive
+```
+
+When a source is disabled:
+
+- Its ingestion step is skipped entirely (no IMAP parsing for Workana, no API call for Remotive).
+- Sender-specific env vars (`WORKANA_SENDER`, etc.) are ignored until that source is re-enabled.
+
+---
+
 ## Environment variables
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
+| `ENABLED_SOURCES` | No | `linkedin` | Comma-separated list of active connectors: `linkedin`, `workana`, `remotive` |
 | `IMAP_HOST` | No | `imap.gmail.com` | IMAP server |
 | `IMAP_PORT` | No | `993` | IMAP port |
 | `IMAP_USER` | **Yes** | — | Email username |

@@ -21,9 +21,11 @@ type ClientConfig struct {
 	User           string
 	Password       string
 	Inbox          string
-	Processed      string
-	LinkedInSender string
-	WorkanaSender  string
+	Processed       string
+	LinkedInSender  string
+	WorkanaSender   string
+	LinkedInEnabled bool
+	WorkanaEnabled  bool
 }
 
 // Client fetches and processes emails from an IMAP mailbox.
@@ -110,13 +112,13 @@ func (c *Client) FetchOffers(ctx context.Context) ([]model.Offer, error) {
 
 		var parsed []model.Offer
 		switch {
-		case strings.Contains(sender, strings.ToLower(c.cfg.LinkedInSender)):
+		case c.cfg.LinkedInEnabled && strings.Contains(sender, strings.ToLower(c.cfg.LinkedInSender)):
 			parsed, err = ParseLinkedIn(body, receivedAt)
 			if err != nil {
 				c.logger.Error("parse linkedin mail", "uid", data.UID, "error", err, "body", truncate(body, 2000))
 				continue
 			}
-		case strings.Contains(sender, strings.ToLower(c.cfg.WorkanaSender)):
+		case c.cfg.WorkanaEnabled && strings.Contains(sender, strings.ToLower(c.cfg.WorkanaSender)):
 			parsed, err = ParseWorkana(body, receivedAt)
 			if err != nil {
 				c.logger.Error("parse workana mail", "uid", data.UID, "error", err)
