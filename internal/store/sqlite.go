@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 
 	_ "modernc.org/sqlite"
 )

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 const systemPrompt = `Eres un asistente que evalúa ofertas de trabajo freelance/remoto para un backend engineer senior con este perfil:

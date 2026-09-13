@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 // Notifier sends Telegram notifications for high-scoring offers.

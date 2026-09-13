@@ -1,4 +1,4 @@
-module scraper
+module github.com/sebastian-basalvino/scraper-job-agent
 
 go 1.25.1
 

@@ -8,9 +8,9 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"scraper/internal/config"
-	"scraper/internal/pipeline"
-	"scraper/internal/store"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/config"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/pipeline"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/store"
 )
 
 func main() {

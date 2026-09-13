@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 func TestParseEnabledSources(t *testing.T) {

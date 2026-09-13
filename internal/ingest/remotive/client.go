@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 const apiURL = "https://remotive.com/api/remote-jobs"

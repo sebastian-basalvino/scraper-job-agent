@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 func TestStoreIsSeenAndSave(t *testing.T) {

@@ -3,7 +3,7 @@ package filter
 import (
 	"testing"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 func TestShouldDiscard(t *testing.T) {

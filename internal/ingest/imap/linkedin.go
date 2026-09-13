@@ -8,7 +8,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 var linkedInJobLinkRe = regexp.MustCompile(`https?://(?:www\.)?linkedin\.com/[^\s"'<>]+`)

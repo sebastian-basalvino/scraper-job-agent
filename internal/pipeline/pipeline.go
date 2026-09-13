@@ -4,14 +4,14 @@ import (
 	"context"
 	"log/slog"
 
-	"scraper/internal/config"
-	"scraper/internal/filter"
-	imapingest "scraper/internal/ingest/imap"
-	"scraper/internal/ingest/remotive"
-	"scraper/internal/model"
-	"scraper/internal/notify"
-	"scraper/internal/scoring"
-	"scraper/internal/store"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/config"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/filter"
+	imapingest "github.com/sebastian-basalvino/scraper-job-agent/internal/ingest/imap"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/ingest/remotive"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/notify"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/scoring"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/store"
 )
 
 // Pipeline orchestrates ingestion, filtering, scoring, and notification.

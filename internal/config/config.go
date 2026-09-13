@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"scraper/internal/model"
+	"github.com/sebastian-basalvino/scraper-job-agent/internal/model"
 )
 
 // Config holds all runtime configuration loaded from environment variables.
