@@ -59,16 +59,19 @@ func (c *Client) FetchOffers(ctx context.Context) ([]model.Offer, error) {
 		return nil, err
 	}
 
-	mbox, err := client.Select(c.cfg.Inbox, nil).Wait()
-	if err != nil {
+	if _, err := client.Select(c.cfg.Inbox, nil).Wait(); err != nil {
 		return nil, fmt.Errorf("select inbox: %w", err)
 	}
 
-	if mbox.NumMessages == 0 {
+	uidSet, err := c.searchSourceUIDs(client)
+	if err != nil {
+		return nil, err
+	}
+	uids, ok := uidSet.Nums()
+	if !ok || len(uids) == 0 {
 		return nil, nil
 	}
 
-	seqSet := imap.SeqSetNum(1, mbox.NumMessages)
 	fetchOptions := &imap.FetchOptions{
 		Envelope: true,
 		UID:      true,
@@ -77,7 +80,7 @@ func (c *Client) FetchOffers(ctx context.Context) ([]model.Offer, error) {
 		},
 	}
 
-	fetchCmd := client.Fetch(seqSet, fetchOptions)
+	fetchCmd := client.Fetch(uidSet, fetchOptions)
 
 	var offers []model.Offer
 	var processedUIDs []imap.UID
@@ -145,6 +148,44 @@ func (c *Client) FetchOffers(ctx context.Context) ([]model.Offer, error) {
 	}
 
 	return offers, nil
+}
+
+func (c *Client) searchSourceUIDs(client *imapclient.Client) (imap.UIDSet, error) {
+	var uidSet imap.UIDSet
+
+	if c.cfg.LinkedInEnabled {
+		uids, err := c.searchSenderUIDs(client, c.cfg.LinkedInSender)
+		if err != nil {
+			return imap.UIDSet{}, err
+		}
+		for _, uid := range uids {
+			uidSet.AddNum(uid)
+		}
+	}
+
+	if c.cfg.WorkanaEnabled {
+		uids, err := c.searchSenderUIDs(client, c.cfg.WorkanaSender)
+		if err != nil {
+			return imap.UIDSet{}, err
+		}
+		for _, uid := range uids {
+			uidSet.AddNum(uid)
+		}
+	}
+
+	return uidSet, nil
+}
+
+func (c *Client) searchSenderUIDs(client *imapclient.Client, sender string) ([]imap.UID, error) {
+	data, err := client.UIDSearch(&imap.SearchCriteria{
+		Header: []imap.SearchCriteriaHeaderField{
+			{Key: "From", Value: sender},
+		},
+	}, nil).Wait()
+	if err != nil {
+		return nil, fmt.Errorf("uid search from %s: %w", sender, err)
+	}
+	return data.AllUIDs(), nil
 }
 
 func (c *Client) ensureProcessedFolder(client *imapclient.Client) error {

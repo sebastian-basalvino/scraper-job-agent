@@ -96,7 +96,9 @@ ifndef SSH_KEY
 endif
 
 # Read deploy.state at recipe time (after provision-ec2 writes it)
-read_state = $(shell grep '^$(1)=' $(DEPLOY_STATE_FILE) 2>/dev/null | cut -d= -f2-)
+define read_state
+$(shell grep '^$(1)=' $(DEPLOY_STATE_FILE) 2>/dev/null | cut -d= -f2-)
+endef
 
 provision-ec2: check-provision ## Create or reuse EC2 instance
 	@chmod +x scripts/provision-ec2.sh
@@ -165,7 +167,8 @@ endif
 # --- Deploy ---
 
 deploy-init: check-deploy ## Create remote directory layout
-	$(SSH) $(EC2_HOST) "mkdir -p $(REMOTE_DIR)/{bin,data,logs}"
+	$(SSH) $(EC2_HOST) "sudo dnf install -y cronie >/dev/null 2>&1; sudo systemctl enable --now crond >/dev/null 2>&1; true"
+	$(SSH) $(EC2_HOST) "sudo mkdir -p $(REMOTE_DIR)/{bin,data,logs} && sudo chown -R ec2-user:ec2-user $(REMOTE_DIR)"
 
 deploy-binary: check-deploy ## Upload binary to the instance
 	@test -f $(BINARY_LINUX) || (echo "error: $(BINARY_LINUX) not found — run 'make build-linux' first" && exit 1)

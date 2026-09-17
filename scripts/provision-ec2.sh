@@ -76,7 +76,7 @@ ensure_security_group() {
     --output text 2>/dev/null || true)"
 
   if [[ -z "${sg_id}" || "${sg_id}" == "None" ]]; then
-    echo "==> Creating security group ${SG_NAME}"
+    echo "==> Creating security group ${SG_NAME}" >&2
     sg_id="$(aws ec2 create-security-group \
       --group-name "${SG_NAME}" \
       --description "SSH access for ${EC2_INSTANCE_NAME}" \
@@ -84,10 +84,10 @@ ensure_security_group() {
       --query "GroupId" \
       --output text)"
   else
-    echo "==> Reusing security group ${SG_NAME} (${sg_id})"
+    echo "==> Reusing security group ${SG_NAME} (${sg_id})" >&2
   fi
 
-  echo "==> Ensuring SSH (22) from ${MY_IP}/32"
+  echo "==> Ensuring SSH (22) from ${MY_IP}/32" >&2
   aws ec2 authorize-security-group-ingress \
     --group-id "${sg_id}" \
     --protocol tcp \
